@@ -1,73 +1,80 @@
-# React + TypeScript + Vite
+# 🚢 Mini TOS (Terminal Operating System)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 1. 프로젝트 개요
 
-Currently, two official plugins are available:
+### 프로젝트명
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**항만 터미널 운영 시스템 (Mini TOS)**
 
-## React Compiler
+### 프로젝트 소개
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+항만 터미널에서 발생하는 선박 입출항, 컨테이너 적치, 게이트 입출고 등의 업무를 관리하는 TOS(Terminal Operating System)를 단순화하여 구현한다.
 
-## Expanding the ESLint configuration
+## 2. 프로젝트 목표
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+실제 항만 운영 프로세스를 기반으로 컨테이너의 위치 추적 및 작업 현황을 실시간으로 관리할 수 있는 시스템을 구축하는 것을 목표로 한다.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 버전별 주요 목표 및 기능
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+#### V1
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+##### 목표
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+* 컨테이너 등록 및 상태 관리
+* 운영 현황 모니터링
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+##### 주요 기능
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- 개별 컨테이너 등록
+- 전체 컨테이너 목록 조회
+- 컨테이너 조회
+- 개별 컨테이너 수정
+- 개별 컨테이너 삭제
+- 컨테이너 상태 변경
+- 상태별 컨테이너 집계 조회
+
+#### V2 (향후)
+
+* AX 추가 (Event 관리)
+* 야드 적치 위치 관리
+
+#### V3 (향후)
+
+* 게이트 입출고 관리
+
+#### V4 (향후)
+
+* 선박 입항 및 출항 관리
+
+### 기대효과
+
+* 컨테이너 위치 추적 자동화
+* 터미널 운영 효율 향상
+* 실시간 운영 현황 제공
+* 데이터 기반 의사결정 지원
+
+---
+
+## 기술 스택
+
+### Backend
+
+* Python 3.13
+* FastAPI
+
+### Database
+
+* PostgreSQL 18.4
+
+### Frontend
+
+* React.js
+* TypeScript
+* Axios
+
+### Infra
+
+* Docker
+* GitHub
+
+---
