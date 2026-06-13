@@ -12,19 +12,13 @@ import {
   getContainers,
   deleteContainer,
   updateContainerStatus,
-  getContainer,
 } from "../api/containerApi";
 
 import ContainerForm from "../components/container/ContainerForm";
-import ContainerDetail from "../components/container/ContainerDetail";
-
 import { handleApiError } from "../utils/errorHandler";
 
 export default function ContainerPage() {
   const [data, setData] = useState<any[]>([]);
-  const [selectedContainer, setSelectedContainer] =
-    useState<any | null>(null);
-
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -50,49 +44,16 @@ export default function ContainerPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteContainer(id);
-
-      if (
-        selectedContainer &&
-        selectedContainer.container_id === id
-      ) {
-        setSelectedContainer(null);
-      }
-
       load();
     } catch (err) {
       handleApiError(err);
     }
   };
-  const handleSelectContainer = async (
-    containerId: string
-  ) => {
-    try {
-      const res = await getContainer(
-        containerId
-      );
 
-      setSelectedContainer(
-        res.data?.data ?? res.data
-      );
-    } catch (err) {
-      handleApiError(err);
-    }
-  };
-
-  const handleStatus = async (
-    id: string,
-    status: string
-  ) => {
+  const handleStatus = async (id: string, status: string) => {
     try {
       await updateContainerStatus(id, status);
-
-      await load();
-
-      const detail = await getContainer(id);
-
-      setSelectedContainer(
-        detail.data?.data ?? detail.data
-      );
+      load();
     } catch (err) {
       handleApiError(err);
     }
@@ -112,9 +73,7 @@ export default function ContainerPage() {
             ? "blue"
             : status === "YARD"
             ? "green"
-            : status === "OUTBOUND"
-            ? "red"
-            : "default";
+            : "red";
 
         return <Tag color={color}>{status}</Tag>;
       },
@@ -123,13 +82,10 @@ export default function ContainerPage() {
       title: "Action",
       render: (_: any, record: any) => (
         <Space>
-          {/* <Button
+          <Button
             size="small"
             onClick={() =>
-              handleStatus(
-                record.container_id,
-                "INBOUND"
-              )
+              handleStatus(record.container_id, "INBOUND")
             }
           >
             IN
@@ -138,10 +94,7 @@ export default function ContainerPage() {
           <Button
             size="small"
             onClick={() =>
-              handleStatus(
-                record.container_id,
-                "YARD"
-              )
+              handleStatus(record.container_id, "YARD")
             }
           >
             YARD
@@ -150,14 +103,11 @@ export default function ContainerPage() {
           <Button
             size="small"
             onClick={() =>
-              handleStatus(
-                record.container_id,
-                "OUTBOUND"
-              )
+              handleStatus(record.container_id, "OUTBOUND")
             }
           >
             OUT
-          </Button> */}
+          </Button>
 
           <Popconfirm
             title="Delete container?"
@@ -185,10 +135,7 @@ export default function ContainerPage() {
       >
         <h2>Container Management</h2>
 
-        <Button
-          type="primary"
-          onClick={() => setOpen(true)}
-        >
+        <Button type="primary" onClick={() => setOpen(true)}>
           + Create
         </Button>
       </div>
@@ -198,18 +145,6 @@ export default function ContainerPage() {
         columns={columns}
         dataSource={data}
         loading={loading}
-        onRow={(record) => ({
-          onClick: () =>
-            handleSelectContainer(record.container_id),
-          style: {
-            cursor: "pointer",
-          },
-        })}
-      />
-
-      <ContainerDetail
-        container={selectedContainer}
-        onStatusChange={handleStatus}
       />
 
       <Modal
@@ -229,4 +164,3 @@ export default function ContainerPage() {
     </div>
   );
 }
-

@@ -33,7 +33,7 @@ export default function ContainerForm({ onSuccess }: any) {
         <Input />
       </Form.Item>
 
-      <Form.Item
+      {/* <Form.Item
         name="status"
         label="Status"
       >
@@ -44,7 +44,7 @@ export default function ContainerForm({ onSuccess }: any) {
             { value: "OUTBOUND" },
           ]}
         />
-      </Form.Item>
+      </Form.Item> */}
 
       <Button type="primary" htmlType="submit" block>
         Create
