@@ -6,6 +6,8 @@ import {
   Space,
   Modal,
   Popconfirm,
+  Row,
+  Col,
 } from "antd";
 
 import {
@@ -17,6 +19,7 @@ import {
 
 import ContainerForm from "../components/container/ContainerForm";
 import ContainerDetail from "../components/container/ContainerDetail";
+import ContainerEvent from "../components/container/ContainerEvent";
 
 import { handleApiError } from "../utils/errorHandler";
 
@@ -28,13 +31,17 @@ export default function ContainerPage() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [eventRefresh, setEventRefresh] = useState(0);
+
   const load = async () => {
     try {
       setLoading(true);
 
       const res = await getContainers();
 
-      const list = res.data?.data ?? res.data ?? [];
+      const list =
+        res.data?.data ?? res.data ?? [];
+
       setData(list);
     } catch (err) {
       handleApiError(err);
@@ -47,7 +54,9 @@ export default function ContainerPage() {
     load();
   }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (
+    id: string
+  ) => {
     try {
       await deleteContainer(id);
 
@@ -63,6 +72,7 @@ export default function ContainerPage() {
       handleApiError(err);
     }
   };
+
   const handleSelectContainer = async (
     containerId: string
   ) => {
@@ -84,14 +94,23 @@ export default function ContainerPage() {
     status: string
   ) => {
     try {
-      await updateContainerStatus(id, status);
+      await updateContainerStatus(
+        id,
+        status
+      );
 
       await load();
 
-      const detail = await getContainer(id);
+      const detail =
+        await getContainer(id);
 
       setSelectedContainer(
-        detail.data?.data ?? detail.data
+        detail.data?.data ??
+          detail.data
+      );
+
+      setEventRefresh(
+        (prev) => prev + 1
       );
     } catch (err) {
       handleApiError(err);
@@ -116,56 +135,32 @@ export default function ContainerPage() {
             ? "red"
             : "default";
 
-        return <Tag color={color}>{status}</Tag>;
+        return (
+          <Tag color={color}>
+            {status}
+          </Tag>
+        );
       },
     },
     {
       title: "Action",
-      render: (_: any, record: any) => (
+      render: (
+        _: any,
+        record: any
+      ) => (
         <Space>
-          {/* <Button
-            size="small"
-            onClick={() =>
-              handleStatus(
-                record.container_id,
-                "INBOUND"
-              )
-            }
-          >
-            IN
-          </Button>
-
-          <Button
-            size="small"
-            onClick={() =>
-              handleStatus(
-                record.container_id,
-                "YARD"
-              )
-            }
-          >
-            YARD
-          </Button>
-
-          <Button
-            size="small"
-            onClick={() =>
-              handleStatus(
-                record.container_id,
-                "OUTBOUND"
-              )
-            }
-          >
-            OUT
-          </Button> */}
-
           <Popconfirm
             title="Delete container?"
             onConfirm={() =>
-              handleDelete(record.container_id)
+              handleDelete(
+                record.container_id
+              )
             }
           >
-            <Button danger size="small">
+            <Button
+              danger
+              size="small"
+            >
               Delete
             </Button>
           </Popconfirm>
@@ -179,15 +174,20 @@ export default function ContainerPage() {
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent:
+            "space-between",
           marginBottom: 16,
         }}
       >
-        <h2>Container Management</h2>
+        <h2>
+          Container Management
+        </h2>
 
         <Button
           type="primary"
-          onClick={() => setOpen(true)}
+          onClick={() =>
+            setOpen(true)
+          }
         >
           + Create
         </Button>
@@ -200,23 +200,53 @@ export default function ContainerPage() {
         loading={loading}
         onRow={(record) => ({
           onClick: () =>
-            handleSelectContainer(record.container_id),
+            handleSelectContainer(
+              record.container_id
+            ),
           style: {
             cursor: "pointer",
           },
         })}
       />
 
-      <ContainerDetail
-        container={selectedContainer}
-        onStatusChange={handleStatus}
-      />
+      {selectedContainer && (
+        <Row
+          gutter={16}
+          align = "top"
+          style={{
+            marginTop: 16,
+          }}
+        >
+          <Col span={10}>
+            <ContainerDetail
+              container={
+                selectedContainer
+              }
+              onStatusChange={
+                handleStatus
+              }
+            />
+          </Col>
+
+          <Col span={14}>
+            <ContainerEvent
+              containerId={
+                selectedContainer.container_id
+              }
+
+              refresh={eventRefresh}
+            />
+          </Col>
+        </Row>
+      )}
 
       <Modal
         title="Create Container"
         open={open}
         footer={null}
-        onCancel={() => setOpen(false)}
+        onCancel={() =>
+          setOpen(false)
+        }
         destroyOnClose
       >
         <ContainerForm
