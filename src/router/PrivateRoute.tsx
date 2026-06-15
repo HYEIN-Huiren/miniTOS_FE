@@ -1,21 +1,12 @@
 import { Navigate } from "react-router-dom";
-import { isAuthenticated } from "../utils/auth";
+import { useAuthStore } from "../store/authStore";
 
-interface Props {
-  children: React.ReactNode;
-}
+export default function PrivateRoute({ children }: any) {
+  const user = useAuthStore((s) => s.user);
 
-export default function PrivateRoute({
-  children,
-}: Props) {
-  if (!isAuthenticated()) {
-    return (
-      <Navigate
-        to="/"
-        replace
-      />
-    );
+  if (!user) {
+    return <Navigate to="/" replace />;
   }
 
-  return <>{children}</>;
+  return children;
 }

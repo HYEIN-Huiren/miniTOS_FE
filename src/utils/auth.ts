@@ -21,9 +21,9 @@ export function removeToken(): void {
   );
 }
 
-export function isAuthenticated(): boolean {
-  return !!getToken();
-}
+// export function isAuthenticated(): boolean {
+//   return !!getToken();
+// }
 
 export function getUsername():
   string | null {

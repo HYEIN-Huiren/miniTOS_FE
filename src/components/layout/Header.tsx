@@ -1,14 +1,18 @@
 import { Button } from "antd";
 import { useNavigate } from "react-router-dom";
 
-import { getUsername, removeToken } from "../../utils/auth";
+import { removeToken } from "../../utils/auth";
+import { useAuthStore } from "../../store/authStore";
 
 export default function Header() {
   const navigate = useNavigate();
-  const username = getUsername();
+
+  const user = useAuthStore((s) => s.user);
+  const clearUser = useAuthStore((s) => s.clear);
 
   const logout = () => {
     removeToken();
+    clearUser();
     navigate("/");
   };
 
@@ -36,13 +40,10 @@ export default function Header() {
         }}
       >
         <span>
-          {username}
+          {user?.username}
         </span>
 
-        <Button
-          danger
-          onClick={logout}
-        >
+        <Button danger onClick={logout}>
           Logout
         </Button>
       </div>

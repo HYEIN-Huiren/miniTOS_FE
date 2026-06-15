@@ -5,6 +5,7 @@ import DashboardPage from "../pages/DashboardPage";
 import LoginPage from "../pages/LoginPage";
 
 import PrivateRoute from "./PrivateRoute";
+import UsersPage from "../pages/UsersPage";
 
 export default function Router() {
   return (
@@ -20,6 +21,11 @@ export default function Router() {
           <Route path="/containers" element={
             <PrivateRoute>
               <ContainerPage />
+            </PrivateRoute>
+          } />
+          <Route path="/users" element={
+            <PrivateRoute>
+              <UsersPage />
             </PrivateRoute>
           } />
         </Route>

@@ -22,26 +22,29 @@ import ContainerDetail from "../components/container/ContainerDetail";
 import ContainerEvent from "../components/container/ContainerEvent";
 
 import { handleApiError } from "../utils/errorHandler";
+import { useAuthStore } from "../store/authStore";
 
 export default function ContainerPage() {
   const [data, setData] = useState<any[]>([]);
-  const [selectedContainer, setSelectedContainer] =
-    useState<any | null>(null);
-
+  const [selectedContainer, setSelectedContainer] = useState<any | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [eventRefresh, setEventRefresh] = useState(0);
 
+  // =========================
+  // AUTH
+  // =========================
+  const user = useAuthStore((s) => s.user);
+  const isViewer = user?.role === "VIEWER";
+
+  // =========================
+  // LOAD
+  // =========================
   const load = async () => {
     try {
       setLoading(true);
-
       const res = await getContainers();
-
-      const list =
-        res.data?.data ?? res.data ?? [];
-
+      const list = res.data?.data ?? res.data ?? [];
       setData(list);
     } catch (err) {
       handleApiError(err);
@@ -54,16 +57,14 @@ export default function ContainerPage() {
     load();
   }, []);
 
-  const handleDelete = async (
-    id: string
-  ) => {
+  // =========================
+  // DELETE
+  // =========================
+  const handleDelete = async (id: string) => {
     try {
       await deleteContainer(id);
 
-      if (
-        selectedContainer &&
-        selectedContainer.container_id === id
-      ) {
+      if (selectedContainer && selectedContainer.container_id === id) {
         setSelectedContainer(null);
       }
 
@@ -73,50 +74,38 @@ export default function ContainerPage() {
     }
   };
 
-  const handleSelectContainer = async (
-    containerId: string
-  ) => {
+  // =========================
+  // SELECT
+  // =========================
+  const handleSelectContainer = async (containerId: string) => {
     try {
-      const res = await getContainer(
-        containerId
-      );
-
-      setSelectedContainer(
-        res.data?.data ?? res.data
-      );
+      const res = await getContainer(containerId);
+      setSelectedContainer(res.data?.data ?? res.data);
     } catch (err) {
       handleApiError(err);
     }
   };
 
-  const handleStatus = async (
-    id: string,
-    status: string
-  ) => {
+  // =========================
+  // STATUS UPDATE
+  // =========================
+  const handleStatus = async (id: string, status: string) => {
     try {
-      await updateContainerStatus(
-        id,
-        status
-      );
-
+      await updateContainerStatus(id, status);
       await load();
 
-      const detail =
-        await getContainer(id);
+      const detail = await getContainer(id);
+      setSelectedContainer(detail.data?.data ?? detail.data);
 
-      setSelectedContainer(
-        detail.data?.data ??
-          detail.data
-      );
-
-      setEventRefresh(
-        (prev) => prev + 1
-      );
+      setEventRefresh((prev) => prev + 1);
     } catch (err) {
       handleApiError(err);
     }
   };
 
+  // =========================
+  // TABLE COLUMNS
+  // =========================
   const columns = [
     {
       title: "Container No",
@@ -135,64 +124,57 @@ export default function ContainerPage() {
             ? "red"
             : "default";
 
-        return (
-          <Tag color={color}>
-            {status}
-          </Tag>
-        );
+        return <Tag color={color}>{status}</Tag>;
       },
     },
-    {
-      title: "Action",
-      render: (
-        _: any,
-        record: any
-      ) => (
-        <Space>
-          <Popconfirm
-            title="Delete container?"
-            onConfirm={() =>
-              handleDelete(
-                record.container_id
-              )
-            }
-          >
-            <Button
-              danger
-              size="small"
-            >
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
+
+    // 🔥 VIEWER 아닐 때만 Action 컬럼 추가
+    ...(!isViewer
+      ? [
+          {
+            title: "Action",
+            render: (_: any, record: any) => (
+              <Space>
+                <Popconfirm
+                  title="Delete container?"
+                  onConfirm={() =>
+                    handleDelete(record.container_id)
+                  }
+                >
+                  <Button danger size="small">
+                    Delete
+                  </Button>
+                </Popconfirm>
+              </Space>
+            ),
+          },
+        ]
+      : []),
   ];
 
+  // =========================
+  // RENDER
+  // =========================
   return (
     <div>
+      {/* HEADER */}
       <div
         style={{
           display: "flex",
-          justifyContent:
-            "space-between",
+          justifyContent: "space-between",
           marginBottom: 16,
         }}
       >
-        <h2>
-          Container Management
-        </h2>
+        <h2>Container Management</h2>
 
-        <Button
-          type="primary"
-          onClick={() =>
-            setOpen(true)
-          }
-        >
-          + Create
-        </Button>
+        {!isViewer && (
+          <Button type="primary" onClick={() => setOpen(true)}>
+            + Create
+          </Button>
+        )}
       </div>
 
+      {/* TABLE */}
       <Table
         rowKey="container_id"
         columns={columns}
@@ -200,63 +182,51 @@ export default function ContainerPage() {
         loading={loading}
         onRow={(record) => ({
           onClick: () =>
-            handleSelectContainer(
-              record.container_id
-            ),
-          style: {
-            cursor: "pointer",
-          },
+            handleSelectContainer(record.container_id),
+          style: { cursor: "pointer" },
         })}
       />
 
+      {/* DETAIL AREA */}
       {selectedContainer && (
-        <Row
-          gutter={16}
-          align = "top"
-          style={{
-            marginTop: 16,
-          }}
-        >
-          <Col span={10}>
-            <ContainerDetail
-              container={
-                selectedContainer
-              }
-              onStatusChange={
-                handleStatus
-              }
-            />
-          </Col>
+        <Row gutter={16} align="top" style={{ marginTop: 16 }}>
+          {/* VIEWER는 Detail 제거 */}
+          {!isViewer && (
+            <Col span={10}>
+              <ContainerDetail
+                container={selectedContainer}
+                onStatusChange={handleStatus}
+              />
+            </Col>
+          )}
 
-          <Col span={14}>
+          {/* TIMELINE ONLY */}
+          <Col span={isViewer ? 24 : 14}>
             <ContainerEvent
-              containerId={
-                selectedContainer.container_id
-              }
-
+              containerId={selectedContainer.container_id}
               refresh={eventRefresh}
             />
           </Col>
         </Row>
       )}
 
-      <Modal
-        title="Create Container"
-        open={open}
-        footer={null}
-        onCancel={() =>
-          setOpen(false)
-        }
-        destroyOnClose
-      >
-        <ContainerForm
-          onSuccess={() => {
-            setOpen(false);
-            load();
-          }}
-        />
-      </Modal>
+      {/* CREATE MODAL */}
+      {!isViewer && (
+        <Modal
+          title="Create Container"
+          open={open}
+          footer={null}
+          onCancel={() => setOpen(false)}
+          destroyOnClose
+        >
+          <ContainerForm
+            onSuccess={() => {
+              setOpen(false);
+              load();
+            }}
+          />
+        </Modal>
+      )}
     </div>
   );
 }
-
