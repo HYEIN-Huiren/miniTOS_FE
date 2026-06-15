@@ -1,5 +1,7 @@
 import axios from "axios";
 import { message } from "antd";
+import {getToken} from "../utils/auth"
+import { removeToken } from "../utils/auth";
 
 export const api = axios.create({
   baseURL: "http://localhost:8000",
@@ -10,6 +12,13 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  const token = getToken();
+
+  if (token) {
+    config.headers.Authorization =
+      `Bearer ${token}`;
+  }
+
   if (config.data && typeof config.data === "object") {
     Object.keys(config.data).forEach((key) => {
       const value = config.data[key];
@@ -28,8 +37,11 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    const status = error?.response?.status;
-    const data = error?.response?.data;
+    const status =
+      error?.response?.status;
+
+    const data =
+      error?.response?.data;
 
     const msg =
       data?.detail ||
@@ -37,10 +49,17 @@ api.interceptors.response.use(
       error.message ||
       "Unknown error";
 
-    // 500 이상
+    if (status === 401) {
+      removeToken();
+
+      window.location.href = "/";
+    }
+
     if (status >= 500) {
-      message.error("Server Error: " + msg);
-    } else {
+      message.error(
+        "Server Error: " + msg
+      );
+    } else if (status !== 401) {
       message.error(msg);
     }
 

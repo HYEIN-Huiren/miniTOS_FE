@@ -15,7 +15,7 @@ export default function Sidebar() {
       onClick={(item) => navigate(item.key)}
       items={[
         {
-          key: "/",
+          key: "/dashboard",
           icon: <DashboardOutlined />,
           label: "Dashboard",
         },
