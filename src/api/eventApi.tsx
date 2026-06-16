@@ -6,3 +6,16 @@ export const getContainerEvents = (
   api.get(
     `/containers/${containerId}/events`
   );
+
+export const createContainerEvent = (
+  containerId: string,
+  payload: {
+    event_type: string;
+    status: string;
+  }
+) => {
+  return api.post(
+    `/containers/${containerId}/events`,
+    payload
+  );
+};

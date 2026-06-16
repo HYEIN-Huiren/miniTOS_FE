@@ -5,32 +5,54 @@ import {
   Button,
   Space,
   Tag,
+  Select,
 } from "antd";
-
-const STATUS_LIST = [
-  "INBOUND",
-  "YARD",
-  "OUTBOUND",
-];
 
 interface Props {
   container: any;
-  onStatusChange: (
+  onEvent: (
     containerId: string,
+    event_type: string,
     status: string
   ) => void;
 }
 
+const STATUS_LIST = [
+  "REGISTERED",
+  "INBOUND",
+  "YARD",
+  "OUTBOUND",
+  "CLOSED",
+];
+
+const EVENT_TYPE_LIST = [
+  "REGISTER",
+  "INBOUND",
+  "MOVE_YARD",
+  "OUTBOUND",
+  "CLOSED",
+];
+
 export default function ContainerDetail({
   container,
-  onStatusChange,
+  onEvent,
 }: Props) {
   const [selectedStatus, setSelectedStatus] =
+    useState("");
+
+  const [selectedEventType, setSelectedEventType] =
     useState("");
 
   useEffect(() => {
     if (container) {
       setSelectedStatus(container.status);
+
+      // 기본값
+      setSelectedEventType(
+        container.status === "REGISTERED"
+          ? "INBOUND"
+          : container.status
+      );
     }
   }, [container]);
 
@@ -40,22 +62,24 @@ export default function ContainerDetail({
 
   const getTagColor = (status: string) => {
     switch (status) {
+      case "REGISTERED":
+        return "default";
+
       case "INBOUND":
         return "blue";
+
       case "YARD":
         return "green";
+
       case "OUTBOUND":
         return "red";
+
+      case "CLOSED":
+        return "purple";
+
       default:
         return "default";
     }
-  };
-
-  const handleUpdate = () => {
-    onStatusChange(
-      container.container_id,
-      selectedStatus
-    );
   };
 
   return (
@@ -64,51 +88,62 @@ export default function ContainerDetail({
       style={{ marginTop: 24 }}
     >
       <Descriptions column={1}>
-        {/* <Descriptions.Item label="Container ID">
-          {container.container_id}
-        </Descriptions.Item> */}
-
         <Descriptions.Item label="Container No">
           {container.container_no}
         </Descriptions.Item>
 
-        <Descriptions.Item label="Status">
-          <Space wrap>
-            {STATUS_LIST.map((status) => (
-              <Button
-                key={status}
-                type={
-                  selectedStatus === status
-                    ? "primary"
-                    : "default"
-                }
-                onClick={() =>
-                  setSelectedStatus(status)
-                }
-              >
-                {status}
-              </Button>
-            ))}
+        <Descriptions.Item label="Current Status">
+          <Tag color={getTagColor(container.status)}>
+            {container.status}
+          </Tag>
+        </Descriptions.Item>
 
+        <Descriptions.Item label="Event Type">
+          <Select
+            style={{ width: 220 }}
+            value={selectedEventType}
+            onChange={setSelectedEventType}
+            options={EVENT_TYPE_LIST.map(
+              (value) => ({
+                label: value,
+                value,
+              })
+            )}
+          />
+        </Descriptions.Item>
+
+        <Descriptions.Item label="To Status">
+          <Select
+            style={{ width: 220 }}
+            value={selectedStatus}
+            onChange={setSelectedStatus}
+            options={STATUS_LIST.map(
+              (value) => ({
+                label: value,
+                value,
+              })
+            )}
+          />
+        </Descriptions.Item>
+
+        <Descriptions.Item label="Action">
+          <Space>
             <Button
               type="primary"
               disabled={
-                selectedStatus ===
-                container.status
+                !selectedEventType ||
+                !selectedStatus
               }
               onClick={() =>
-                onStatusChange(
+                onEvent(
                   container.container_id,
+                  selectedEventType,
                   selectedStatus
                 )
               }
             >
               수정
             </Button>
-
-            <Tag color={getTagColor(container.status)}>
-              현재: {container.status}
-            </Tag>
           </Space>
         </Descriptions.Item>
 

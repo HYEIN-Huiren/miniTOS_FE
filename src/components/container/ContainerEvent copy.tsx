@@ -33,8 +33,12 @@ export default function ContainerEvent({
     try {
       setLoading(true);
 
-      const res = await getContainerEvents(containerId);
-      const data = res.data?.data ?? [];
+      const res = await getContainerEvents(
+        containerId
+      );
+
+      const data =
+        res.data?.data ?? [];
 
       setEvents(data);
     } catch (err) {
@@ -48,16 +52,19 @@ export default function ContainerEvent({
     loadEvents();
   }, [containerId, refresh]);
 
-  const getEventColor = (eventType: string) => {
-    switch (eventType) {
-      case "GATE_IN":
+  const getStatusColor = (
+    status: string
+  ) => {
+    switch (status) {
+      case "INBOUND":
         return "blue";
-      case "MOVE_YARD":
+
+      case "YARD":
         return "green";
-      case "LOAD_VESSEL":
-        return "orange";
-      case "GATE_OUT":
+
+      case "OUTBOUND":
         return "red";
+
       default:
         return "default";
     }
@@ -65,56 +72,59 @@ export default function ContainerEvent({
 
   const columns = [
     {
-      title: "Event",
-      key: "event",
-      render: (_: any, record: any) => (
-        <div>
-          <Tag color={getEventColor(record.event_type)}>
-            {record.event_type}
-          </Tag>
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
 
-          <div style={{ fontSize: 12, marginTop: 4, color: "#666" }}>
-            {record.from_status} → {record.status}
-          </div>
-        </div>
+      render: (status: string) => (
+        <Tag color={getStatusColor(status)}>
+          {status}
+        </Tag>
       ),
     },
     {
       title: "Event Time",
       dataIndex: "created_at",
       key: "created_at",
+
       render: (value: string) =>
-        new Date(value).toLocaleString("ko-KR", {
-          timeZone: "Asia/Seoul",
-        }),
+        new Date(value).toLocaleString(
+          "ko-KR",
+          {
+            timeZone: "Asia/Seoul",
+          }
+        ),
     },
   ];
 
   if (!containerId) {
     return (
       <Card title="Event History">
-        <Empty description="Select Container" />
+        <Empty
+          description="Select Container"
+        />
       </Card>
     );
   }
 
   return (
-    <Card title="Event History" style={{ height: "100%" }}>
-      {/* FLOW VIEW (Steps) */}
+    <Card
+      title="Event History"
+      style={{ height: "100%" }}
+    >
       <Steps
-  size="small"
-  current={events.length - 1}
-  items={[...events]
-    .reverse()
-    .map((event) => ({
-      title: event.event_type,
-      description: `${event.from_status} → ${event.status}`,
-    }))}
-/>
+        size="small"
+        current={events.length - 1}
+        items={events
+          .slice()
+          .reverse()
+          .map((event) => ({
+            title: event.status,
+          }))}
+      />
 
       <Divider />
 
-      {/* TABLE VIEW */}
       <Table
         rowKey="event_id"
         columns={columns}
@@ -122,7 +132,9 @@ export default function ContainerEvent({
         loading={loading}
         pagination={false}
         size="small"
-        scroll={{ y: 300 }}
+        scroll={{
+          y: 300,
+        }}
       />
     </Card>
   );
