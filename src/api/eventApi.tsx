@@ -12,6 +12,7 @@ export const createContainerEvent = (
   payload: {
     event_type: string;
     status: string;
+    yard_id?: number;
   }
 ) => {
   return api.post(

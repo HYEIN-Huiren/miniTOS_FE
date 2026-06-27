@@ -72,12 +72,14 @@ export default function ContainerPage() {
   const handleEvent = async (
     containerId: string,
     event_type: string,
-    status: string
+    status: string,
+    yard_id?: number,
   ) => {
     try {
       await createContainerEvent(containerId, {
         event_type,
         status,
+        yard_id,
       });
 
       // detail refresh
